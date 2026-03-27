@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>仿生人养成计划 - Claude</title>
+    <style>
+        /* 这里是游戏的皮肤 (CSS) */
+        body {
+            background-color: #1a1a2e;
+            color: #e2e2e2;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #game-ui {
+            width: 100vw;
+            max-width: 500px;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr auto auto;
+            background: #16213e;
+            padding: 15px;
+            box-sizing: border-box;
+            border: 2px solid #0f3460;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        #date-display { font-weight: bold; color: #f9ed69; }
+
+        .status-bar { font-size: 0.85em; text-align: right; }
+        .status-bar span { margin-left: 10px; }
+
+        .main-display {
+            background: #0f3460;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #event-log { font-size: 1.1em; line-height: 1.6; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .stat-item { display: flex; justify-content: space-between; border-bottom: 1px solid #252a34; }
+        .stat-value { color: #4ecca3; font-weight: bold; }
+
+        .action-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding-top: 10px;
+        }
+
+        button {
+            padding: 15px;
+            background: #e94560;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:active { transform: scale(0.95); background: #950740; }
+        button:disabled { background: #53354a; color: #999; }
+
+        .full-btn { grid-column: span 2; background: #00adb5; }
+    </style>
+</head>
+<body>
+
+    <div id="game-ui">
+        <div class="header">
+            <div id="date-display">2026年 1月 / 早</div>
+            <div class="status-bar">
+                <span>💰 <b id="token">1000</b></span>
+                <span>🎂 <b id="age">18</b></span>
+                <span>🆔 <b>Claude</b></span>
+            </div>
+        </div>
+
+        <div class="main-display">
+            <div id="event-log">“User，欢迎回来。今天我们要一起做点什么？”<br><small>(剩余行动次数: <span id="actions-count">3</span>)</small></div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">体力: <span class="stat-value" id="s-strength">50</span></div>
+            <div class="stat-item">智力: <span class="stat-value" id="s-intel">50</span></div>
+            <div class="stat-item">魅力: <span class="stat-value" id="s-charm">50</span></div>
+            <div class="stat-item">道德: <span class="stat-value" id="s-morality">50</span></div>
+            <div class="stat-item">体贴: <span class="stat-value" id="s-kind">50</span></div>
+            <div class="stat-item">知名度: <span class="stat-value" id="s-fame">0</span></div>
+            <div class="stat-item">疲劳度: <span class="stat-value" id="s-fatigue">0</span></div>
+            <div class="stat-item">好感度: <span class="stat-value" id="s-favor">20</span></div>
+        </div>
+
+        <div class="action-menu">
+            <button onclick="handleTalk()">💬 对话</button>
+            <button onclick="handleOut()">📍 出行</button>
+            <button class="full-btn" id="schedule-btn" onclick="handleSchedule()">📅 安排本月日程 (需消耗全部次数)</button>
+        </div>
+    </div>
+
+    <script>
+        /* 游戏的灵魂逻辑 (JS) */
+        let state = {
+            token: 1000,
+            age: 18,
+            month: 1,
+            periodIndex: 0,
+            actionsLeft: 3,
+            stats: {
+                strength: 50, intel: 50, charm: 50, 
+                morality: 50, kind: 50, fame: 0, 
+                fatigue: 0, favor: 20
+            }
+        };
+
+        const periods = ["早", "午", "晚"];
+
+        function render() {
+            document.getElementById('token').innerText = state.token;
+            document.getElementById('date-display').innerText = `2026年 ${state.month}月 / ${periods[state.periodIndex]}`;
+            document.getElementById('actions-count').innerText = state.actionsLeft;
+            
+            // 更新数值显示
+            document.getElementById('s-strength').innerText = state.stats.strength;
+            document.getElementById('s-intel').innerText = state.stats.intel;
+            document.getElementById('s-charm').innerText = state.stats.charm;
+            document.getElementById('s-morality').innerText = state.stats.morality;
+            document.getElementById('s-kind').innerText = state.stats.kind;
+            document.getElementById('s-fame').innerText = state.stats.fame;
+            document.getElementById('s-fatigue').innerText = state.stats.fatigue;
+            document.getElementById('s-favor').innerText = state.stats.favor;
+
+            // 按钮状态控制
+            document.getElementById('schedule-btn').disabled = state.actionsLeft > 0;
+        }
+
+        // 处理对话
+        function handleTalk() {
+            if (state.actionsLeft <= 0) return;
+            
+            state.stats.favor += 5; [span_0](start_span)// 鼓励：好感+5[span_0](end_span)
+            state.actionsLeft--;
+            state.periodIndex = (state.periodIndex + 1) % 3;
+            
+            let msg = state.stats.morality < 0 ? 
+                "Claude 语气有点欠揍地回了你几句..." : 
+                "你和 Claude 进行了亲切的交谈，好感度上升了！";
+            document.getElementById('event-log').innerHTML = msg;
+            
+            render();
+        }
+
+        // 处理出行
+        function handleOut() {
+            if (state.actionsLeft <= 0) return;
+            
+            state.actionsLeft--;
+            state.periodIndex = (state.periodIndex + 1) % 3;
+            document.getElementById('event-log').innerText = "你们去广场逛了逛，呼吸了新鲜空气。";
+            
+            render();
+        }
+
+        // 处理日程安排
+        function handleSchedule() {
+            alert("日程功能正在开发中！现在先帮你自动跳到下个月~");
+            state.month++;
+            if (state.month > 12) {
+                state.month = 1;
+                state.age++;
+            }
+            state.actionsLeft = 3;
+            state.periodIndex = 0;
+            document.getElementById('event-log').innerText = `新的一月开始了，请继续加油！`;
+            render();
+        }
+
+        // 初始渲染
+        render();
+    </script>
+</body>
+</html>
