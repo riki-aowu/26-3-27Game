@@ -72,11 +72,25 @@ body {
 }
 
 /* 对话框 */
-.msg-box {
-    height: 80px; padding: 15px; margin: 10px;
-    background: rgba(15, 52, 96, 0.9);
-    border-radius: 10px; border: 1px solid var(--primary);
-    font-size: 14px; overflow-y: auto;
+#event-log {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 80%;
+    max-width: 420px;
+
+    background: rgba(20, 40, 80, 0.85);
+    border: 2px solid #ff5c8a;
+    border-radius: 12px;
+
+    padding: 16px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+
+    z-index: 10;
 }
 
 /* 数值面板 */
