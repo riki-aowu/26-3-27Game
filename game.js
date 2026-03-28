@@ -200,6 +200,19 @@ const Game = {
         this.openModal(html);
     },
 
+    restDay() {
+    this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 30);
+
+    this.state.time = 0;
+    this.state.month++;
+    this.state.actionsLeft = 3;
+
+    alert("休息了一整天，进入下个月");
+
+    this.updateTimeUI();
+    this.renderStats();
+}，
+    
     addTask(name) {
         if (this.selectedTasks.length >= 6) return;
 
