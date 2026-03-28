@@ -29,6 +29,7 @@ const Game = {
 
     init() {
         this.loadGame();
+        this.initBGM();
         this.renderStats();
     },
 
