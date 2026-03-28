@@ -33,7 +33,7 @@ body {
 #character-sprite {
     position: absolute; bottom: 0; left: 50%;
     transform: translateX(-50%);
-    width: 80%; height: 70%;
+    width: 80%; height: 80%;
     display: flex; align-items: flex-end; justify-content: center;
 }
 
