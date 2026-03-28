@@ -31,15 +31,10 @@ body {
 }
 
 #character-sprite {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
+    position: absolute; bottom: 0; left: 50%;
     transform: translateX(-50%);
-    width: 60%;
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+    width: 80%; height: 70%;
+    display: flex; align-items: flex-end; justify-content: center;
 }
 
 .img-fallback {
@@ -47,10 +42,33 @@ body {
     padding: 20px; border: 1px dashed #444;
 }
 
-/* 状态栏 */
-.header {
-    padding: 10px 20px; display: flex; justify-content: space-between;
-    background: rgba(0,0,0,0.5); z-index: 10;
+/* =====================
+   顶部UI（时间 + 金币）
+===================== */
+
+#top-bar {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#date-display {
+    color: white;
+    font-size: 16px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+#token {
+    color: gold;
+    font-size: 16px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
 }
 
 /* 对话框 */
@@ -107,10 +125,4 @@ button {
     border-radius: 10px;
     color: white;
     min-width: 250px;
-}
-
-#character-img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
 }
