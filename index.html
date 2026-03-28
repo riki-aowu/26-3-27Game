@@ -6,19 +6,32 @@
     <title>仿生人养成计划</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <audio id="bgm-daily" loop>
-    <source src="assets/Daily.mp3" type="audio/mpeg">
-</audio>
 
-<audio id="bgm-map" loop>
-    <source src="assets/Map.mp3" type="audio/mpeg">
-</audio>
+<body>
+
+    <!-- 🎵 日常音乐 -->
+    <audio id="bgm-daily" loop preload="auto">
+        <source src="assets/Daily.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 🗺️ 地图音乐 -->
+    <audio id="bgm-map" loop preload="auto">
+        <source src="assets/Map.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="game-container">
+
         <div id="scene-layer">
-            <div class="img-fallback">背景图片加载中...<br>(待上传: assets/bg_room.jpg)</div>
+            <div class="img-fallback">
+                背景图片加载中...<br>
+                (待上传: assets/bg_room.jpg)
+            </div>
+
             <div id="character-sprite">
-                <div class="img-fallback">人物立绘加载中...<br>(待上传: assets/claude_normal.png)</div>
+                <div class="img-fallback">
+                    人物立绘加载中...<br>
+                    (待上传: assets/claude_normal.png)
+                </div>
             </div>
         </div>
 
@@ -31,8 +44,7 @@
             <div id="event-log">“User，准备好开始今天的计划了吗？”</div>
         </div>
 
-        <div class="stats-panel" id="stats-ui">
-            </div>
+        <div class="stats-panel" id="stats-ui"></div>
 
         <div class="action-bar">
             <button onclick="Game.doTalk()">💬 对话</button>
@@ -40,13 +52,16 @@
             <button class="primary-btn" onclick="Game.openSchedule()">📅 安排日程</button>
             <button onclick="Game.saveGame()">💾 存档</button>
         </div>
+
     </div>
 
     <div id="modal-overlay" class="hidden">
         <div class="modal" id="modal-content"></div>
     </div>
 
+    <!-- ✅ 顺序不能乱 -->
     <script src="data.js"></script>
     <script src="game.js"></script>
+
 </body>
 </html>
