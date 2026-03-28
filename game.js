@@ -162,12 +162,40 @@ const Game = {
     enterPlace(place) {
         this.changeScene(place);
 
+        const contents = {
+            restaurant: `
+            【餐厅】
+            <br>
+            拉面 -20疲劳 <button onclick="Game.eat(20)">吃</button>
+            <br>
+            牛排 -30疲劳 <button onclick="Game.eat(30)">吃</button>
+            `,
+            bar: `
+            【酒吧】
+            <br>
+            喝酒 +10魅力 -10道德 <button onclick="Game.drink()">喝</button>
+            `,
+            shop: `
+            【礼品店】
+            <br>
+            小礼物 -50代币 +5好感 <button onclick="Game.buyGift()">购买</button>
+            `,
+            alley: `
+            【暗巷】
+            <br>
+            危险地带，小心行事。
+            `,
+            square: `
+            【广场】
+            <br>
+            散步 -10疲劳 <button onclick="Game.eat(10)">散步</button>
+            `
+        };
+
+        const content = contents[place] || `【${place}】<br>此处暂无内容。`;
+
         document.getElementById("event-log").innerHTML = `
-        【餐厅】
-        <br>
-        拉面 -20疲劳 <button onclick="Game.eat(20)">吃</button>
-        <br>
-        牛排 -30疲劳 <button onclick="Game.eat(30)">吃</button>
+        ${content}
         <br><br>
         <button onclick="Game.changeScene('home')">回家</button>
         `;
@@ -195,13 +223,6 @@ const Game = {
     this.selectedTasks = [];
 
     this.openModal(html);
-}
-
-        html += `<p id="task-list"></p>`;
-        html += `<button onclick="Game.confirmSchedule()">确定</button>`;
-
-        this.selectedTasks = [];
-        this.openModal(html);
     },
 
     restDay() {
@@ -215,8 +236,8 @@ const Game = {
 
     this.updateTimeUI();
     this.renderStats();
-}，
-    
+},
+
     addTask(name) {
         if (this.selectedTasks.length >= 6) return;
 
