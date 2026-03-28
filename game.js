@@ -28,6 +28,7 @@ const Game = {
         this.initBGM();
         this.renderStats();
         this.updateTimeUI();
+        this.changeScene("home");
     },
 
     // 🎵 音乐（保留）
