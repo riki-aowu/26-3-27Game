@@ -183,15 +183,19 @@ const Game = {
     // =====================
     openSchedule() {
 
-        let html = "<h3>安排 / 休息（二选一）</h3>";
+    let html = "<h3>选择6个日程</h3>";
 
-        html += `<button onclick="Game.rest()">在家休息</button><br><br>`;
-
-        Object.keys(GameData.schedules)
-         .filter(n => n !== "在家休息")
-         .forEach(n => {
+    Object.keys(GameData.schedules).forEach(n => {
         html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
     });
+
+    html += `<p id="task-list">已选：</p>`;
+    html += `<button onclick="Game.confirmSchedule()">确定</button>`;
+
+    this.selectedTasks = [];
+
+    this.openModal(html);
+}
 
         html += `<p id="task-list"></p>`;
         html += `<button onclick="Game.confirmSchedule()">确定</button>`;
