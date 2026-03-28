@@ -114,7 +114,7 @@ const Game = {
     if (scene === "restaurant") {
         layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
     }
-}，
+},
 
     // =====================
     // 💬 对话（每月一次）
@@ -157,7 +157,7 @@ const Game = {
     <br><br>
     <button onclick="Game.changeScene('home')">回家</button>
     `;
-}，
+},
 
     enterPlace(place) {
         this.changeScene(place);
