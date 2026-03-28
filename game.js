@@ -15,6 +15,16 @@ const Game = {
             fatigue: 0
         },
 
+initBGM() {
+    const bgm = document.getElementById("bgm");
+
+    document.addEventListener("click", () => {
+        if (bgm && bgm.paused) {
+            bgm.volume = 0.5;
+            bgm.play();
+        }
+    }, { once: true });
+}
         social: {
             favor: 20,
             intimacy: 0
