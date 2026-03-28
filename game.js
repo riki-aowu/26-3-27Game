@@ -93,24 +93,28 @@ const Game = {
     // =====================
     // 🎬 场景
     // =====================
-    changeScene(scene) {
-        this.state.currentScene = scene;
-        const layer = document.getElementById("scene-layer");
+   changeScene(scene) {
+    this.state.currentScene = scene;
 
-        if (scene === "home") {
-            layer.style.background = "#252a34";
-            this.playBGM("daily");
-        }
+    const layer = document.getElementById("scene-layer");
+    const log = document.getElementById("event-log");
 
-        if (scene === "map") {
-            layer.style.background = "url('assets/map.jpg') center/cover";
-            this.playBGM("map");
-        }
+    if (scene === "home") {
+        layer.style.background = "#252a34";
+        this.playBGM("daily");
 
-        if (scene === "restaurant") {
-            layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
-        }
-    },
+        log.innerHTML = "“User，准备好开始今天的计划了吗？”";
+    }
+
+    if (scene === "map") {
+        layer.style.background = "url('assets/map.jpg') center/cover";
+        this.playBGM("map");
+    }
+
+    if (scene === "restaurant") {
+        layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
+    }
+}，
 
     // =====================
     // 💬 对话（每月一次）
@@ -136,18 +140,24 @@ const Game = {
     // 🗺️ 出行
     // =====================
     openMap() {
-        if (!this.useAction()) return;
+    if (!this.useAction()) return;
 
-        this.changeScene("map");
+    this.changeScene("map");
 
-        document.getElementById("event-log").innerHTML = `
-        【地图】
-        <br>
-        <button onclick="Game.enterPlace('restaurant')">餐厅</button>
-        <br><br>
-        <button onclick="Game.changeScene('home')">回家</button>
-        `;
-    },
+    const log = document.getElementById("event-log");
+
+    log.innerHTML = `
+    【地图】
+    <br>
+    🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
+    🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
+    🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
+    🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
+    🌕 <button onclick="Game.enterPlace('square')">广场</button>
+    <br><br>
+    <button onclick="Game.changeScene('home')">回家</button>
+    `;
+}，
 
     enterPlace(place) {
         this.changeScene(place);
@@ -177,9 +187,11 @@ const Game = {
 
         html += `<button onclick="Game.rest()">在家休息</button><br><br>`;
 
-        Object.keys(GameData.schedules).forEach(n => {
-            html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
-        });
+        Object.keys(GameData.schedules)
+         .filter(n => n !== "在家休息")
+         .forEach(n => {
+        html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
+    });
 
         html += `<p id="task-list"></p>`;
         html += `<button onclick="Game.confirmSchedule()">确定</button>`;
