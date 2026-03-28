@@ -48,7 +48,12 @@ const GameData = {
             income: 150,
             gain: { strength: 5, kindness: -2, morality: -5 },
             fatigue: 20
-        }
+        },
+        
+        '在家休息': {
+    gain: {},
+    fatigue: -20
+},
     },
 
     // =====================
