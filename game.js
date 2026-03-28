@@ -22,22 +22,17 @@ const Game = {
 
         flags: {
             loveFlag: false
-        },
-
-        history: []
+        }
     },
 
-    // =====================
-    // 初始化
-    // =====================
     init() {
-        this.loadGame();
+        this.loadGame(0);
         this.initBGM();
         this.renderStats();
     },
 
     // =====================
-    // 🎵 音乐系统
+    // 🎵 音乐（完全保留）
     // =====================
     initBGM() {
         this.bgm = {
@@ -52,8 +47,6 @@ const Game = {
     },
 
     playBGM(type) {
-        if (!this.bgm) return;
-
         const target = this.bgm[type];
         if (!target) return;
 
@@ -64,119 +57,181 @@ const Game = {
 
         target.volume = 0.5;
         target.play();
-
         this.bgm.current = target;
     },
 
     // =====================
-    // 疲劳修正
+    // UI工具
     // =====================
-    getGainModifier() {
-        const f = this.state.stats.fatigue;
+    openModal(html) {
+        const overlay = document.getElementById("modal-overlay");
+        const content = document.getElementById("modal-content");
 
-        if (f > 100) return 0;
-        if (f > 80) return 0.5;
-        if (f > 50) return 0.8;
+        content.innerHTML = html;
+        overlay.classList.remove("hidden");
+    },
 
-        return 1.0;
+    closeModal() {
+        document.getElementById("modal-overlay").classList.add("hidden");
     },
 
     // =====================
-    // 月行动
+    // 💬 对话系统
     // =====================
-    runMonth(selectedTasks) {
+    doTalk() {
+        this.openModal(`
+            <h2>对话</h2>
+            <button onclick="Game.chooseTalk('chat')">闲聊 +2</button>
+            <button onclick="Game.chooseTalk('encourage')">鼓励 +5</button>
+            <button onclick="Game.chooseTalk('scold')">责备 -5</button>
+            <button onclick="Game.chooseTalk('intimate')">亲密（需50好感）</button>
+            <br><br>
+            <button onclick="Game.closeModal()">关闭</button>
+        `);
+    },
 
-        const mod = this.getGainModifier();
+    chooseTalk(type) {
+        if (type === "chat") this.state.social.favor += 2;
+        if (type === "encourage") this.state.social.favor += 5;
+        if (type === "scold") this.state.social.favor -= 5;
 
-        selectedTasks.forEach(taskName => {
+        if (type === "intimate") {
+            if (this.state.social.favor >= 50) {
+                this.state.social.intimacy += 5;
+            } else {
+                alert("好感不够！");
+            }
+        }
 
-            const cfg = GameData.schedules[taskName];
+        this.renderStats();
+        this.closeModal();
+    },
+
+    // =====================
+    // 🗺️ 出行系统
+    // =====================
+    openMap() {
+        this.playBGM("map");
+
+        this.openModal(`
+            <h2>地图</h2>
+            <button onclick="Game.goPlace('restaurant')">🍴餐厅</button>
+            <button onclick="Game.goPlace('bar')">🍺酒吧</button>
+            <button onclick="Game.goPlace('shop')">🎁礼品店</button>
+            <button onclick="Game.goPlace('alley')">🌑暗巷</button>
+            <button onclick="Game.goPlace('square')">🌕广场</button>
+            <br><br>
+            <button onclick="Game.backHome();Game.closeModal()">返回</button>
+        `);
+    },
+
+    goPlace(place) {
+        if (place === "restaurant") {
+            this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 20);
+        }
+
+        if (place === "square") {
+            this.state.stats.fame += 5;
+        }
+
+        alert("你去了：" + place);
+        this.renderStats();
+    },
+
+    backHome() {
+        this.playBGM("daily");
+    },
+
+    // =====================
+    // 📅 日程系统
+    // =====================
+    openSchedule() {
+        const list = Object.keys(GameData.schedules);
+
+        let html = "<h2>选择6个日程</h2>";
+
+        list.forEach(name => {
+            html += `<button onclick="Game.addTask('${name}')">${name}</button>`;
+        });
+
+        html += `
+            <p>已选：<span id="task-count">0</span>/6</p>
+            <button onclick="Game.confirmSchedule()">确定</button>
+            <button onclick="Game.closeModal()">取消</button>
+        `;
+
+        this.selectedTasks = [];
+        this.openModal(html);
+    },
+
+    addTask(name) {
+        if (this.selectedTasks.length >= 6) return;
+
+        this.selectedTasks.push(name);
+        document.getElementById("task-count").innerText = this.selectedTasks.length;
+    },
+
+    confirmSchedule() {
+        this.runMonth(this.selectedTasks);
+        this.closeModal();
+    },
+
+    runMonth(tasks) {
+        tasks.forEach(name => {
+            const cfg = GameData.schedules[name];
             if (!cfg) return;
 
             if (cfg.cost) this.state.token -= cfg.cost;
             if (cfg.income) this.state.token += cfg.income;
 
-            for (let s in cfg.gain) {
-                if (this.state.stats[s] !== undefined) {
-                    this.state.stats[s] += Math.floor(cfg.gain[s] * mod);
+            for (let k in cfg.gain) {
+                if (this.state.stats[k] !== undefined) {
+                    this.state.stats[k] += cfg.gain[k];
                 }
             }
 
-            this.state.stats.fatigue = Math.min(
-                150,
-                this.state.stats.fatigue + cfg.fatigue
-            );
+            this.state.stats.fatigue += cfg.fatigue;
         });
 
-        this.checkRandomEvent();
-
         this.state.month++;
-
-        if (this.state.month > 12) {
-            this.checkEnding();
-        }
-
         this.renderStats();
     },
 
     // =====================
-    // 随机事件
+    // 💾 存档系统（4槽位）
     // =====================
-    checkRandomEvent() {
-        if (Math.random() > 0.7) {
+    saveGame(slot = 0) {
+        localStorage.setItem("save_" + slot, JSON.stringify(this.state));
+        alert("已存档到槽位 " + (slot + 1));
+    },
 
-            const ev = GameData.randomEvents[
-                Math.floor(Math.random() * GameData.randomEvents.length)
-            ];
+    loadGame(slot = 0) {
+        const data = localStorage.getItem("save_" + slot);
+        if (data) this.state = JSON.parse(data);
+    },
 
-            alert(`【${ev.title}】\n${ev.text}`);
+    openLoadPanel() {
+        let html = "<h2>读档</h2>";
 
-            if (!ev.effect) return;
-
-            for (let s in ev.effect) {
-                if (this.state.stats[s] !== undefined) {
-                    this.state.stats[s] += ev.effect[s];
-                }
-            }
+        for (let i = 0; i < 4; i++) {
+            html += `<button onclick="Game.loadAndClose(${i})">存档${i + 1}</button><br>`;
         }
+
+        html += `<button onclick="Game.closeModal()">关闭</button>`;
+
+        this.openModal(html);
+    },
+
+    loadAndClose(i) {
+        this.loadGame(i);
+        this.renderStats();
+        this.closeModal();
     },
 
     // =====================
-    // 结局
-    // =====================
-    checkEnding() {
-
-        const result = GameData.getFinalEnding(this.state, this.state.flags);
-
-        if (result.career) {
-            alert(`职业结局：${result.career}`);
-        }
-
-        if (result.marriage) {
-            alert(`婚嫁结局：${result.marriage}`);
-        }
-    },
-
-    // =====================
-    // 存档
-    // =====================
-    saveGame() {
-        localStorage.setItem('claude_save', JSON.stringify(this.state));
-        alert("已保存。");
-    },
-
-    loadGame() {
-        const saved = localStorage.getItem('claude_save');
-        if (saved) {
-            this.state = JSON.parse(saved);
-        }
-    },
-
-    // =====================
-    // UI
+    // UI刷新
     // =====================
     renderStats() {
-
         const panel = document.getElementById('stats-ui');
 
         panel.innerHTML = Object.keys(this.state.stats).map(k => {
@@ -184,21 +239,6 @@ const Game = {
         }).join('');
 
         document.getElementById('token').innerText = this.state.token;
-    },
-
-    // =====================
-    // 示例：进入地图切歌
-    // =====================
-    openMap() {
-        this.playBGM("map");
-        alert("进入地图");
-    },
-
-    // =====================
-    // 示例：返回日常
-    // =====================
-    backHome() {
-        this.playBGM("daily");
     }
 };
 
