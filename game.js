@@ -4,7 +4,8 @@ const Game = {
         token: 1000,
         age: 18,
         month: 1,
-currentScene: "home",
+        currentScene: "home",
+
         stats: {
             strength: 50,
             intel: 50,
@@ -30,27 +31,7 @@ currentScene: "home",
         this.initBGM();
         this.renderStats();
     },
-    
-changeScene(scene) {
-    this.state.currentScene = scene;
 
-    const layer = document.getElementById("scene-layer");
-
-    if (scene === "home") {
-        layer.style.background = "#252a34";
-        this.playBGM("daily");
-    }
-
-    if (scene === "map") {
-        layer.style.background = "url('assets/map.jpg') center/cover";
-        this.playBGM("map");
-    }
-
-    if (scene === "restaurant") {
-        layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
-    }
-}
-    
     // =====================
     // 🎵 音乐（完全保留）
     // =====================
@@ -81,18 +62,26 @@ changeScene(scene) {
     },
 
     // =====================
-    // UI工具
+    // 🎬 场景系统
     // =====================
-    openModal(html) {
-        const overlay = document.getElementById("modal-overlay");
-        const content = document.getElementById("modal-content");
+    changeScene(scene) {
+        this.state.currentScene = scene;
 
-        content.innerHTML = html;
-        overlay.classList.remove("hidden");
-    },
+        const layer = document.getElementById("scene-layer");
 
-    closeModal() {
-        document.getElementById("modal-overlay").classList.add("hidden");
+        if (scene === "home") {
+            layer.style.background = "#252a34";
+            this.playBGM("daily");
+        }
+
+        if (scene === "map") {
+            layer.style.background = "url('assets/map.jpg') center/cover";
+            this.playBGM("map");
+        }
+
+        if (scene === "restaurant") {
+            layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
+        }
     },
 
     // =====================
@@ -123,97 +112,63 @@ changeScene(scene) {
             }
         }
 
-        renderStats() {
-    const panel = document.getElementById('stats-ui');
-
-    let html = "";
-
-    for (let k in this.state.stats) {
-        html += `<div>${k}: ${this.state.stats[k]}</div>`;
-    }
-
-    html += `<div>favor: ${this.state.social.favor}</div>`;
-    html += `<div>intimacy: ${this.state.social.intimacy}</div>`;
-
-    panel.innerHTML = html;
-
-    document.getElementById('token').innerText = this.state.token;
-}
+        this.renderStats();
         this.closeModal();
     },
 
     // =====================
-    // 🗺️ 出行系统
+    // 🗺️ 地图
     // =====================
-openMap() {
-    this.playBGM("map");
+    openMap() {
+        this.changeScene("map");
 
-    this.changeScene("map");
+        const log = document.getElementById("event-log");
 
-    const log = document.getElementById("event-log");
-
-    log.innerHTML = `
-    【地图】
-    <br>
-    🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
-    🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
-    🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
-    🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
-    🌕 <button onclick="Game.enterPlace('square')">广场</button>
-    <br><br>
-    <button onclick="Game.changeScene('home')">返回</button>
-    `;
-},
-    
-enterPlace(place) {
-
-    this.changeScene(place);
-
-    const log = document.getElementById("event-log");
-
-    if (place === "restaurant") {
         log.innerHTML = `
-        【餐厅】
+        【地图】
         <br>
-        🍜 拉面（-20疲劳）
-        <button onclick="Game.eat(20)">吃</button>
-        <br>
-        🥩 牛排（-30疲劳 +魅力）
-        <button onclick="Game.eat(30, 'charm')">吃</button>
+        🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
+        🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
+        🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
+        🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
+        🌕 <button onclick="Game.enterPlace('square')">广场</button>
         <br><br>
-        <button onclick="Game.openMap()">返回地图</button>
+        <button onclick="Game.changeScene('home')">返回</button>
         `;
-    }
-}，
-eat(val, stat) {
-    this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - val);
+    },
 
-    if (stat) {
-        this.state.stats[stat] += 2;
-    }
+    enterPlace(place) {
+        this.changeScene(place);
 
-    this.renderStats();
-}
+        const log = document.getElementById("event-log");
 
-    goPlace(place) {
         if (place === "restaurant") {
-            this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 20);
+            log.innerHTML = `
+            【餐厅】
+            <br>
+            🍜 拉面（-20疲劳）
+            <button onclick="Game.eat(20)">吃</button>
+            <br>
+            🥩 牛排（-30疲劳 +魅力）
+            <button onclick="Game.eat(30, 'charm')">吃</button>
+            <br><br>
+            <button onclick="Game.openMap()">返回地图</button>
+            `;
+        }
+    },
+
+    eat(val, stat) {
+        this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - val);
+
+        if (stat) {
+            this.state.stats[stat] += 2;
         }
 
-        if (place === "square") {
-            this.state.stats.fame += 5;
-        }
-
-        alert("你去了：" + place);
         this.renderStats();
     },
 
-    backHome() {
-        this.playBGM("daily");
-    },
-
     // =====================
-    // 📅 日程系统
+    // 📅 日程
     // =====================
     openSchedule() {
         const list = Object.keys(GameData.schedules);
@@ -268,7 +223,7 @@ eat(val, stat) {
     },
 
     // =====================
-    // 💾 存档系统（4槽位）
+    // 💾 存档
     // =====================
     saveGame(slot = 0) {
         localStorage.setItem("save_" + slot, JSON.stringify(this.state));
@@ -299,14 +254,33 @@ eat(val, stat) {
     },
 
     // =====================
-    // UI刷新
+    // UI
     // =====================
+    openModal(html) {
+        const overlay = document.getElementById("modal-overlay");
+        const content = document.getElementById("modal-content");
+
+        content.innerHTML = html;
+        overlay.classList.remove("hidden");
+    },
+
+    closeModal() {
+        document.getElementById("modal-overlay").classList.add("hidden");
+    },
+
     renderStats() {
         const panel = document.getElementById('stats-ui');
 
-        panel.innerHTML = Object.keys(this.state.stats).map(k => {
-            return `<div>${k}: ${this.state.stats[k]}</div>`;
-        }).join('');
+        let html = "";
+
+        for (let k in this.state.stats) {
+            html += `<div>${k}: ${this.state.stats[k]}</div>`;
+        }
+
+        html += `<div>favor: ${this.state.social.favor}</div>`;
+        html += `<div>intimacy: ${this.state.social.intimacy}</div>`;
+
+        panel.innerHTML = html;
 
         document.getElementById('token').innerText = this.state.token;
     }
