@@ -366,7 +366,8 @@ const Game = {
         html += `<div>行动: ${this.state.actionsLeft}</div>`;
 
         panel.innerHTML = html;
-        document.getElementById("token").innerText = this.state.token;
+        const tokenEl = document.getElementById("token");
+        if (tokenEl) tokenEl.innerText = this.state.token;
         this.updateCharacter();
     },
 
