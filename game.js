@@ -7,6 +7,7 @@ const Game = {
         time: 0, // 0早 1午 2晚
         actionsLeft: 3,
         currentScene: "home",
+        talkUsed: false,
 
         stats: {
             strength: 50,
@@ -71,6 +72,7 @@ const Game = {
             alert("进入下个月");
         }
 
+        this.state.talkUsed = false;
         this.updateTimeUI();
     },
 
@@ -94,45 +96,51 @@ const Game = {
     // =====================
     // 🎬 场景
     // =====================
-   changeScene(scene) {
-    this.state.currentScene = scene;
+    changeScene(scene) {
+        this.state.currentScene = scene;
 
-    const layer = document.getElementById("scene-layer");
-    const log = document.getElementById("event-log");
+        const layer = document.getElementById("scene-layer");
+        const log = document.getElementById("event-log");
 
-    if (scene === "home") {
-        layer.style.background = "url('assets/bedroom.png') center/cover";
-        this.playBGM("daily");
+        if (scene === "home") {
+            layer.style.background = "url('assets/bedroom.png') center/cover";
+            this.playBGM("daily");
 
-        log.innerHTML = "“User，准备好开始今天的计划了吗？”";
-    }
+            log.innerHTML = "\u201cUser，准备好开始今天的计划了吗？\u201d";
+        }
 
-    if (scene === "map") {
-        layer.style.background = "url('assets/map.jpg') center/cover";
-        this.playBGM("map");
-    }
+        if (scene === "map") {
+            layer.style.background = "url('assets/map.jpg') center/cover";
+            this.playBGM("map");
+        }
 
-    if (scene === "restaurant") {
-        layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
-    }
-},
+        if (scene === "restaurant") {
+            layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
+        }
+    },
 
     // =====================
-    // 💬 对话（每月一次）
+    // 💬 对话（每天一次）
     // =====================
     doTalk() {
-        if (!this.useAction()) return;
+        if (this.state.talkUsed) {
+            alert("今天已经聊过了！");
+            return;
+        }
 
         this.openModal(`
         <h3>对话</h3>
         <button onclick="Game.talkEffect(2)">闲聊 +2</button>
         <button onclick="Game.talkEffect(5)">鼓励 +5</button>
         <button onclick="Game.talkEffect(-5)">责备 -5</button>
+        <br><br>
+        <button onclick="Game.closeModal()">取消</button>
         `);
     },
 
     talkEffect(val) {
         this.state.social.favor += val;
+        this.state.talkUsed = true;
         this.renderStats();
         this.closeModal();
     },
@@ -141,24 +149,24 @@ const Game = {
     // 🗺️ 出行
     // =====================
     openMap() {
-    if (!this.useAction()) return;
+        if (!this.useAction()) return;
 
-    this.changeScene("map");
+        this.changeScene("map");
 
-    const log = document.getElementById("event-log");
+        const log = document.getElementById("event-log");
 
-    log.innerHTML = `
-    【地图】
-    <br>
-    🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
-    🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
-    🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
-    🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
-    🌕 <button onclick="Game.enterPlace('square')">广场</button>
-    <br><br>
-    <button onclick="Game.changeScene('home')">回家</button>
-    `;
-},
+        log.innerHTML = `
+        【地图】
+        <br>
+        🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
+        🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
+        🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
+        🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
+        🌕 <button onclick="Game.enterPlace('square')">广场</button>
+        <br><br>
+        <button onclick="Game.changeScene('home')">回家</button>
+        `;
+    },
 
     enterPlace(place) {
         this.changeScene(place);
@@ -211,33 +219,32 @@ const Game = {
     // 📅 日程 or 休息
     // =====================
     openSchedule() {
+        let html = "<h3>选择6个日程</h3>";
 
-    let html = "<h3>选择6个日程</h3>";
+        Object.keys(GameData.schedules).forEach(n => {
+            html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
+        });
 
-    Object.keys(GameData.schedules).forEach(n => {
-        html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
-    });
+        html += `<p id="task-list">已选：</p>`;
+        html += `<button onclick="Game.confirmSchedule()">确定</button>`;
 
-    html += `<p id="task-list">已选：</p>`;
-    html += `<button onclick="Game.confirmSchedule()">确定</button>`;
+        this.selectedTasks = [];
 
-    this.selectedTasks = [];
-
-    this.openModal(html);
+        this.openModal(html);
     },
 
     restDay() {
-    this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 30);
+        this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 30);
 
-    this.state.time = 0;
-    this.state.month++;
-    this.state.actionsLeft = 3;
+        this.state.time = 0;
+        this.state.month++;
+        this.state.actionsLeft = 3;
 
-    alert("休息了一整天，进入下个月");
+        alert("休息了一整天，进入下个月");
 
-    this.updateTimeUI();
-    this.renderStats();
-},
+        this.updateTimeUI();
+        this.renderStats();
+    },
 
     addTask(name) {
         if (this.selectedTasks.length >= 6) return;
