@@ -7,7 +7,8 @@ const Game = {
         time: 0, // 0早 1午 2晚
         actionsLeft: 3,
         currentScene: "home",
-
+        talkUsed: false,
+        
         stats: {
             strength: 50,
             intel: 50,
@@ -71,7 +72,7 @@ const Game = {
             alert("进入下个月");
         }
 
-        this.updateTimeUI();
+        this.state.talkUsed = false;
     },
 
     updateTimeUI() {
@@ -121,20 +122,32 @@ const Game = {
     // 💬 对话（每月一次）
     // =====================
     doTalk() {
-        if (!this.useAction()) return;
 
-        this.openModal(`
+    if (this.state.talkUsed) {
+        alert("今天已经聊过了！");
+        return;
+    }
+
+    this.openModal(`
         <h3>对话</h3>
         <button onclick="Game.talkEffect(2)">闲聊 +2</button>
         <button onclick="Game.talkEffect(5)">鼓励 +5</button>
         <button onclick="Game.talkEffect(-5)">责备 -5</button>
-        `);
+        <br><br>
+        <button onclick="Game.closeModal()">取消</button>
+    `);
+}
     },
 
     talkEffect(val) {
+
         this.state.social.favor += val;
+
+        this.state.talkUsed = true;
+
         this.renderStats();
         this.closeModal();
+    }
     },
 
     // =====================
