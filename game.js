@@ -341,6 +341,34 @@ const Game = {
 
         panel.innerHTML = html;
         document.getElementById("token").innerText = this.state.token;
+        this.updateCharacter();
+    },
+
+    updateCharacter() {
+        const img = document.getElementById("character-img");
+        const favor = this.state.social.favor;
+        const intimacy = this.state.social.intimacy;
+
+        let src = "assets/Claude_Normal.png";
+
+        // ❤️ 亲密优先
+        if (intimacy > 0) {
+            src = "assets/Claude_Shy.png";
+        }
+        // 😡 负好感
+        else if (favor < 0) {
+            src = "assets/Claude_Angry.png";
+        }
+        // 😐 冷淡
+        else if (favor <= 30) {
+            src = "assets/Claude_Cold.png";
+        }
+        // 😊 正常
+        else {
+            src = "assets/Claude_Normal.png";
+        }
+
+        img.src = src;
     }
 
     updateCharacter() {
