@@ -103,3 +103,9 @@ button {
     color: white;
     min-width: 250px;
 }
+
+#character-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
