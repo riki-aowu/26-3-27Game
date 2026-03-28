@@ -16,13 +16,15 @@ const Game = {
         },
 
 initBGM() {
-    const bgm = document.getElementById("bgm");
+    this.bgm = {
+        daily: document.getElementById("bgm-daily"),
+        map: document.getElementById("bgm-map"),
+        current: null
+    };
 
+    // 用户点击后才能播放（iOS限制）
     document.addEventListener("click", () => {
-        if (bgm && bgm.paused) {
-            bgm.volume = 0.5;
-            bgm.play();
-        }
+        this.playBGM("daily");
     }, { once: true });
 }
         social: {
