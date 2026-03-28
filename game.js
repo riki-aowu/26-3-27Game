@@ -339,8 +339,19 @@ const Game = {
 
         let html = "";
 
+        const nameMap = {
+            strength: "体力",
+            intel: "智力",
+            charm: "魅力",
+            morality: "道德",
+            kindness: "体贴",
+            fame: "知名度",
+            fatigue: "疲劳"
+        };
+
         for (let k in this.state.stats) {
-            html += `<div>${k}: ${this.state.stats[k]}</div>`;
+            const name = nameMap[k] || k;
+            html += `<div>${name}: ${this.state.stats[k]}</div>`;
         }
 
         html += `<div>好感: ${this.state.social.favor}</div>`;
