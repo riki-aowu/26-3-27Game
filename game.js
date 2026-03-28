@@ -27,6 +27,24 @@ initBGM() {
         this.playBGM("daily");
     }, { once: true });
 }
+playBGM(type) {
+    if (!this.bgm) return;
+
+    const target = this.bgm[type];
+    if (!target) return;
+
+    // 停掉当前音乐
+    if (this.bgm.current && this.bgm.current !== target) {
+        this.bgm.current.pause();
+        this.bgm.current.currentTime = 0;
+    }
+
+    // 播放新音乐
+    target.volume = 0.5;
+    target.play();
+
+    this.bgm.current = target;
+}
         social: {
             favor: 20,
             intimacy: 0
