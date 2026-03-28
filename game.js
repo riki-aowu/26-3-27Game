@@ -30,7 +30,27 @@ currentScene: "home",
         this.initBGM();
         this.renderStats();
     },
+    
+changeScene(scene) {
+    this.state.currentScene = scene;
 
+    const layer = document.getElementById("scene-layer");
+
+    if (scene === "home") {
+        layer.style.background = "#252a34";
+        this.playBGM("daily");
+    }
+
+    if (scene === "map") {
+        layer.style.background = "url('assets/map.jpg') center/cover";
+        this.playBGM("map");
+    }
+
+    if (scene === "restaurant") {
+        layer.style.background = "url('assets/bg_restaurant.jpg') center/cover";
+    }
+}
+    
     // =====================
     // 🎵 音乐（完全保留）
     // =====================
