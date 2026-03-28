@@ -10,41 +10,11 @@ const Game = {
             intel: 50,
             charm: 50,
             morality: 50,
-            kindness: 50,   // ✅ 统一用 kindness
+            kindness: 50,
             fame: 0,
             fatigue: 0
         },
 
-initBGM() {
-    this.bgm = {
-        daily: document.getElementById("bgm-daily"),
-        map: document.getElementById("bgm-map"),
-        current: null
-    };
-
-    // 用户点击后才能播放（iOS限制）
-    document.addEventListener("click", () => {
-        this.playBGM("daily");
-    }, { once: true });
-}
-playBGM(type) {
-    if (!this.bgm) return;
-
-    const target = this.bgm[type];
-    if (!target) return;
-
-    // 停掉当前音乐
-    if (this.bgm.current && this.bgm.current !== target) {
-        this.bgm.current.pause();
-        this.bgm.current.currentTime = 0;
-    }
-
-    // 播放新音乐
-    target.volume = 0.5;
-    target.play();
-
-    this.bgm.current = target;
-}
         social: {
             favor: 20,
             intimacy: 0
@@ -57,10 +27,45 @@ playBGM(type) {
         history: []
     },
 
+    // =====================
+    // 初始化
+    // =====================
     init() {
         this.loadGame();
         this.initBGM();
         this.renderStats();
+    },
+
+    // =====================
+    // 🎵 音乐系统
+    // =====================
+    initBGM() {
+        this.bgm = {
+            daily: document.getElementById("bgm-daily"),
+            map: document.getElementById("bgm-map"),
+            current: null
+        };
+
+        document.addEventListener("click", () => {
+            this.playBGM("daily");
+        }, { once: true });
+    },
+
+    playBGM(type) {
+        if (!this.bgm) return;
+
+        const target = this.bgm[type];
+        if (!target) return;
+
+        if (this.bgm.current && this.bgm.current !== target) {
+            this.bgm.current.pause();
+            this.bgm.current.currentTime = 0;
+        }
+
+        target.volume = 0.5;
+        target.play();
+
+        this.bgm.current = target;
     },
 
     // =====================
@@ -88,18 +93,15 @@ playBGM(type) {
             const cfg = GameData.schedules[taskName];
             if (!cfg) return;
 
-            // 扣钱 / 收入
             if (cfg.cost) this.state.token -= cfg.cost;
             if (cfg.income) this.state.token += cfg.income;
 
-            // 属性增长
             for (let s in cfg.gain) {
                 if (this.state.stats[s] !== undefined) {
                     this.state.stats[s] += Math.floor(cfg.gain[s] * mod);
                 }
             }
 
-            // 疲劳上限
             this.state.stats.fatigue = Math.min(
                 150,
                 this.state.stats.fatigue + cfg.fatigue
@@ -140,7 +142,7 @@ playBGM(type) {
     },
 
     // =====================
-    // 结局（核心升级版）
+    // 结局
     // =====================
     checkEnding() {
 
@@ -182,6 +184,21 @@ playBGM(type) {
         }).join('');
 
         document.getElementById('token').innerText = this.state.token;
+    },
+
+    // =====================
+    // 示例：进入地图切歌
+    // =====================
+    openMap() {
+        this.playBGM("map");
+        alert("进入地图");
+    },
+
+    // =====================
+    // 示例：返回日常
+    // =====================
+    backHome() {
+        this.playBGM("daily");
     }
 };
 
