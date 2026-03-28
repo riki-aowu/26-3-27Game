@@ -130,20 +130,25 @@ changeScene(scene) {
     // =====================
     // 🗺️ 出行系统
     // =====================
-    openMap() {
-        this.playBGM("map");
+openMap() {
+    this.playBGM("map");
 
-        this.openModal(`
-            <h2>地图</h2>
-            <button onclick="Game.goPlace('restaurant')">🍴餐厅</button>
-            <button onclick="Game.goPlace('bar')">🍺酒吧</button>
-            <button onclick="Game.goPlace('shop')">🎁礼品店</button>
-            <button onclick="Game.goPlace('alley')">🌑暗巷</button>
-            <button onclick="Game.goPlace('square')">🌕广场</button>
-            <br><br>
-            <button onclick="Game.backHome();Game.closeModal()">返回</button>
-        `);
-    },
+    this.changeScene("map");
+
+    const log = document.getElementById("event-log");
+
+    log.innerHTML = `
+    【地图】
+    <br>
+    🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
+    🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
+    🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
+    🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
+    🌕 <button onclick="Game.enterPlace('square')">广场</button>
+    <br><br>
+    <button onclick="Game.changeScene('home')">返回</button>
+    `;
+},
 
     goPlace(place) {
         if (place === "restaurant") {
