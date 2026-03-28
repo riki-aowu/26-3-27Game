@@ -4,6 +4,8 @@ const Game = {
         token: 1000,
         age: 18,
         month: 1,
+        time: 0, // 0早 1午 2晚
+        actionsLeft: 3,
         currentScene: "home",
 
         stats: {
@@ -19,22 +21,16 @@ const Game = {
         social: {
             favor: 20,
             intimacy: 0
-        },
-
-        flags: {
-            loveFlag: false
         }
     },
 
     init() {
-        this.loadGame(0);
         this.initBGM();
         this.renderStats();
+        this.updateTimeUI();
     },
 
-    // =====================
-    // 🎵 音乐（完全保留）
-    // =====================
+    // 🎵 音乐（保留）
     initBGM() {
         this.bgm = {
             daily: document.getElementById("bgm-daily"),
@@ -62,11 +58,43 @@ const Game = {
     },
 
     // =====================
-    // 🎬 场景系统
+    // ⏰ 时间系统
+    // =====================
+    nextTime() {
+        this.state.time++;
+
+        if (this.state.time > 2) {
+            this.state.time = 0;
+            this.state.month++;
+            this.state.actionsLeft = 3;
+            alert("进入下个月");
+        }
+
+        this.updateTimeUI();
+    },
+
+    updateTimeUI() {
+        const arr = ["早", "午", "晚"];
+        document.getElementById("date-display").innerText =
+            `2026年 ${this.state.month}月 / ${arr[this.state.time]}`;
+    },
+
+    useAction() {
+        if (this.state.actionsLeft <= 0) {
+            alert("本月行动次数已用完！");
+            return false;
+        }
+
+        this.state.actionsLeft--;
+        this.nextTime();
+        return true;
+    },
+
+    // =====================
+    // 🎬 场景
     // =====================
     changeScene(scene) {
         this.state.currentScene = scene;
-
         const layer = document.getElementById("scene-layer");
 
         if (scene === "home") {
@@ -85,105 +113,76 @@ const Game = {
     },
 
     // =====================
-    // 💬 对话系统
+    // 💬 对话（每月一次）
     // =====================
     doTalk() {
+        if (!this.useAction()) return;
+
         this.openModal(`
-            <h2>对话</h2>
-            <button onclick="Game.chooseTalk('chat')">闲聊 +2</button>
-            <button onclick="Game.chooseTalk('encourage')">鼓励 +5</button>
-            <button onclick="Game.chooseTalk('scold')">责备 -5</button>
-            <button onclick="Game.chooseTalk('intimate')">亲密（需50好感）</button>
-            <br><br>
-            <button onclick="Game.closeModal()">关闭</button>
+        <h3>对话</h3>
+        <button onclick="Game.talkEffect(2)">闲聊 +2</button>
+        <button onclick="Game.talkEffect(5)">鼓励 +5</button>
+        <button onclick="Game.talkEffect(-5)">责备 -5</button>
         `);
     },
 
-    chooseTalk(type) {
-        if (type === "chat") this.state.social.favor += 2;
-        if (type === "encourage") this.state.social.favor += 5;
-        if (type === "scold") this.state.social.favor -= 5;
-
-        if (type === "intimate") {
-            if (this.state.social.favor >= 50) {
-                this.state.social.intimacy += 5;
-            } else {
-                alert("好感不够！");
-            }
-        }
-
+    talkEffect(val) {
+        this.state.social.favor += val;
         this.renderStats();
         this.closeModal();
     },
 
     // =====================
-    // 🗺️ 地图
+    // 🗺️ 出行
     // =====================
     openMap() {
+        if (!this.useAction()) return;
+
         this.changeScene("map");
 
-        const log = document.getElementById("event-log");
-
-        log.innerHTML = `
+        document.getElementById("event-log").innerHTML = `
         【地图】
         <br>
-        🍴 <button onclick="Game.enterPlace('restaurant')">餐厅</button>
-        🍺 <button onclick="Game.enterPlace('bar')">酒吧</button>
-        🎁 <button onclick="Game.enterPlace('shop')">礼品店</button>
-        🌑 <button onclick="Game.enterPlace('alley')">暗巷</button>
-        🌕 <button onclick="Game.enterPlace('square')">广场</button>
+        <button onclick="Game.enterPlace('restaurant')">餐厅</button>
         <br><br>
-        <button onclick="Game.changeScene('home')">返回</button>
+        <button onclick="Game.changeScene('home')">回家</button>
         `;
     },
 
     enterPlace(place) {
         this.changeScene(place);
 
-        const log = document.getElementById("event-log");
-
-        if (place === "restaurant") {
-            log.innerHTML = `
-            【餐厅】
-            <br>
-            🍜 拉面（-20疲劳）
-            <button onclick="Game.eat(20)">吃</button>
-            <br>
-            🥩 牛排（-30疲劳 +魅力）
-            <button onclick="Game.eat(30, 'charm')">吃</button>
-            <br><br>
-            <button onclick="Game.openMap()">返回地图</button>
-            `;
-        }
+        document.getElementById("event-log").innerHTML = `
+        【餐厅】
+        <br>
+        拉面 -20疲劳 <button onclick="Game.eat(20)">吃</button>
+        <br>
+        牛排 -30疲劳 <button onclick="Game.eat(30)">吃</button>
+        <br><br>
+        <button onclick="Game.changeScene('home')">回家</button>
+        `;
     },
 
-    eat(val, stat) {
+    eat(val) {
         this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - val);
-
-        if (stat) {
-            this.state.stats[stat] += 2;
-        }
-
         this.renderStats();
     },
 
     // =====================
-    // 📅 日程
+    // 📅 日程 or 休息
     // =====================
     openSchedule() {
-        const list = Object.keys(GameData.schedules);
 
-        let html = "<h2>选择6个日程</h2>";
+        let html = "<h3>安排 / 休息（二选一）</h3>";
 
-        list.forEach(name => {
-            html += `<button onclick="Game.addTask('${name}')">${name}</button>`;
+        html += `<button onclick="Game.rest()">在家休息</button><br><br>`;
+
+        Object.keys(GameData.schedules).forEach(n => {
+            html += `<button onclick="Game.addTask('${n}')">${n}</button>`;
         });
 
-        html += `
-            <p>已选：<span id="task-count">0</span>/6</p>
-            <button onclick="Game.confirmSchedule()">确定</button>
-            <button onclick="Game.closeModal()">取消</button>
-        `;
+        html += `<p id="task-list"></p>`;
+        html += `<button onclick="Game.confirmSchedule()">确定</button>`;
 
         this.selectedTasks = [];
         this.openModal(html);
@@ -193,11 +192,19 @@ const Game = {
         if (this.selectedTasks.length >= 6) return;
 
         this.selectedTasks.push(name);
-        document.getElementById("task-count").innerText = this.selectedTasks.length;
+
+        document.getElementById("task-list").innerText =
+            "已选：" + this.selectedTasks.join(",");
     },
 
     confirmSchedule() {
         this.runMonth(this.selectedTasks);
+        this.closeModal();
+    },
+
+    rest() {
+        this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - 20);
+        this.nextTime();
         this.closeModal();
     },
 
@@ -210,45 +217,49 @@ const Game = {
             if (cfg.income) this.state.token += cfg.income;
 
             for (let k in cfg.gain) {
-                if (this.state.stats[k] !== undefined) {
-                    this.state.stats[k] += cfg.gain[k];
-                }
+                this.state.stats[k] += cfg.gain[k];
             }
 
             this.state.stats.fatigue += cfg.fatigue;
         });
 
-        this.state.month++;
+        this.nextTime();
         this.renderStats();
     },
 
     // =====================
-    // 💾 存档
+    // 💾 存档（弹出4格）
     // =====================
-    saveGame(slot = 0) {
-        localStorage.setItem("save_" + slot, JSON.stringify(this.state));
-        alert("已存档到槽位 " + (slot + 1));
+    saveGame() {
+        let html = "<h3>选择存档</h3>";
+
+        for (let i = 0; i < 4; i++) {
+            html += `<button onclick="Game.doSave(${i})">存档${i + 1}</button><br>`;
+        }
+
+        this.openModal(html);
     },
 
-    loadGame(slot = 0) {
-        const data = localStorage.getItem("save_" + slot);
-        if (data) this.state = JSON.parse(data);
+    doSave(i) {
+        localStorage.setItem("save_" + i, JSON.stringify(this.state));
+        alert("已保存！");
+        this.closeModal();
     },
 
     openLoadPanel() {
-        let html = "<h2>读档</h2>";
+        let html = "<h3>读取存档</h3>";
 
         for (let i = 0; i < 4; i++) {
             html += `<button onclick="Game.loadAndClose(${i})">存档${i + 1}</button><br>`;
         }
 
-        html += `<button onclick="Game.closeModal()">关闭</button>`;
-
         this.openModal(html);
     },
 
     loadAndClose(i) {
-        this.loadGame(i);
+        const data = localStorage.getItem("save_" + i);
+        if (data) this.state = JSON.parse(data);
+
         this.renderStats();
         this.closeModal();
     },
@@ -257,11 +268,8 @@ const Game = {
     // UI
     // =====================
     openModal(html) {
-        const overlay = document.getElementById("modal-overlay");
-        const content = document.getElementById("modal-content");
-
-        content.innerHTML = html;
-        overlay.classList.remove("hidden");
+        document.getElementById("modal-content").innerHTML = html;
+        document.getElementById("modal-overlay").classList.remove("hidden");
     },
 
     closeModal() {
@@ -269,7 +277,7 @@ const Game = {
     },
 
     renderStats() {
-        const panel = document.getElementById('stats-ui');
+        const panel = document.getElementById("stats-ui");
 
         let html = "";
 
@@ -277,12 +285,12 @@ const Game = {
             html += `<div>${k}: ${this.state.stats[k]}</div>`;
         }
 
-        html += `<div>favor: ${this.state.social.favor}</div>`;
-        html += `<div>intimacy: ${this.state.social.intimacy}</div>`;
+        html += `<div>好感: ${this.state.social.favor}</div>`;
+        html += `<div>亲密: ${this.state.social.intimacy}</div>`;
+        html += `<div>行动: ${this.state.actionsLeft}</div>`;
 
         panel.innerHTML = html;
-
-        document.getElementById('token').innerText = this.state.token;
+        document.getElementById("token").innerText = this.state.token;
     }
 };
 
