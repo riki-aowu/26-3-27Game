@@ -275,7 +275,14 @@ const Game = {
             if (cfg.income) this.state.token += cfg.income;
 
             for (let k in cfg.gain) {
-                this.state.stats[k] += cfg.gain[k];
+                // 👉 属性类（体力/智力等）
+                if (this.state.stats[k] !== undefined) {
+                    this.state.stats[k] += cfg.gain[k];
+                }
+                // 👉 社交类（好感/亲密）
+                else if (this.state.social[k] !== undefined) {
+                    this.state.social[k] += cfg.gain[k];
+                }
             }
 
             this.state.stats.fatigue += cfg.fatigue;
