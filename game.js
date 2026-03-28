@@ -100,7 +100,7 @@ const Game = {
     const log = document.getElementById("event-log");
 
     if (scene === "home") {
-        layer.style.background = "#252a34";
+        layer.style.background = "url('assets/bedroom.png') center/cover";
         this.playBGM("daily");
 
         log.innerHTML = "“User，准备好开始今天的计划了吗？”";
