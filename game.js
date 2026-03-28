@@ -123,7 +123,22 @@ changeScene(scene) {
             }
         }
 
-        this.renderStats();
+        renderStats() {
+    const panel = document.getElementById('stats-ui');
+
+    let html = "";
+
+    for (let k in this.state.stats) {
+        html += `<div>${k}: ${this.state.stats[k]}</div>`;
+    }
+
+    html += `<div>favor: ${this.state.social.favor}</div>`;
+    html += `<div>intimacy: ${this.state.social.intimacy}</div>`;
+
+    panel.innerHTML = html;
+
+    document.getElementById('token').innerText = this.state.token;
+}
         this.closeModal();
     },
 
@@ -149,6 +164,36 @@ openMap() {
     <button onclick="Game.changeScene('home')">返回</button>
     `;
 },
+    
+enterPlace(place) {
+
+    this.changeScene(place);
+
+    const log = document.getElementById("event-log");
+
+    if (place === "restaurant") {
+        log.innerHTML = `
+        【餐厅】
+        <br>
+        🍜 拉面（-20疲劳）
+        <button onclick="Game.eat(20)">吃</button>
+        <br>
+        🥩 牛排（-30疲劳 +魅力）
+        <button onclick="Game.eat(30, 'charm')">吃</button>
+        <br><br>
+        <button onclick="Game.openMap()">返回地图</button>
+        `;
+    }
+}，
+eat(val, stat) {
+    this.state.stats.fatigue = Math.max(0, this.state.stats.fatigue - val);
+
+    if (stat) {
+        this.state.stats[stat] += 2;
+    }
+
+    this.renderStats();
+}
 
     goPlace(place) {
         if (place === "restaurant") {
