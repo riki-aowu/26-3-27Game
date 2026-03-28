@@ -76,3 +76,30 @@ button {
 .primary-btn { background: var(--primary); font-weight: bold; }
 
 .hidden { display: none !important; }
+/* =====================
+   弹窗系统（关键）
+===================== */
+
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 999;
+}
+
+.modal {
+    background: #1e1e2f;
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    min-width: 250px;
+}
