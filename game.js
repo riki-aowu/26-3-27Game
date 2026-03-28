@@ -4,7 +4,7 @@ const Game = {
         token: 1000,
         age: 18,
         month: 1,
-
+currentScene: "home",
         stats: {
             strength: 50,
             intel: 50,
