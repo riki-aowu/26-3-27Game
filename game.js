@@ -15,6 +15,8 @@ const Game = {
             charm: 50,
             morality: 50,
             kindness: 50,
+            mana: 0,
+            power: 0,
             fame: 0,
             fatigue: 0
         },
@@ -288,6 +290,13 @@ const Game = {
             this.state.stats.fatigue += cfg.fatigue;
         });
 
+        // 疲劳上限检查
+        if (this.state.stats.fatigue >= 100) {
+            alert("过度疲劳，被迫休息！");
+            this.restDay();
+            return;
+        }
+
         this.nextTime();
         this.renderStats();
     },
@@ -352,6 +361,8 @@ const Game = {
             charm: "魅力",
             morality: "道德",
             kindness: "体贴",
+            mana: "魔力",
+            power: "武力",
             fame: "知名度",
             fatigue: "疲劳"
         };

@@ -4,20 +4,20 @@ const GameData = {
     // 属性结构（统一规范）
     // =====================
     statsTemplate: {
-        base: {
+        stats: {
             strength: 0,
             intel: 0,
             charm: 0,
             morality: 0,
             kindness: 0,
-            fame: 0
+            mana: 0,
+            power: 0,
+            fame: 0,
+            fatigue: 0
         },
         social: {
-            favor: 0,        // 好感
-            intimacy: 0      // 亲密度
-        },
-        condition: {
-            fatigue: 0
+            favor: 0,
+            intimacy: 0
         }
     },
 
@@ -95,25 +95,25 @@ const GameData = {
         'UNDERWORLD': {
             type: 'career',
             name: "黑道老大",
-            cond: (s) => s.base.strength > 200 && s.base.morality < 20
+            cond: (s) => s.stats.strength > 200 && s.stats.morality < 20
         },
 
         'ARTIST': {
             type: 'career',
             name: "知名艺术家",
-            cond: (s) => s.base.charm > 150 && s.base.intel > 100
+            cond: (s) => s.stats.charm > 150 && s.stats.intel > 100
         },
 
         'GAMER': {
             type: 'career',
             name: "电竞冠军",
-            cond: (s) => s.base.intel > 150 && s.base.fame > 100
+            cond: (s) => s.stats.intel > 150 && s.stats.fame > 100
         },
 
         'SCHOLAR': {
             type: 'career',
             name: "学者",
-            cond: (s) => s.base.intel > 180 && s.base.morality > 80
+            cond: (s) => s.stats.intel > 180 && s.stats.morality > 80
         },
 
         'FREE': {
