@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "aisay-chatroom": {
+      "type": "sse",
+      "url": "https://aisay.top/chatroom/mcp?token=2a726dda9a6613d3366c7b07c23f3218883b10d44ce66b97"
+    }
+  }
+}
